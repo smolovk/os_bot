@@ -1,34 +1,49 @@
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
+import chalk
 import telebot
 
 bot = telebot.TeleBot("1303574038:AAFXtPPeRwatYsxpp6qsLgqmQPp7jyAZFBs", parse_mode="HTML")
 
+green = "[" + chalk.green("+") + "]"
+yellow = "[" + chalk.yellow("+") + "]"
+red = "[" + chalk.red("+") + "]"
 
-from PIL import ImageFont
-from PIL import Image
-from PIL import ImageDraw
+print(green + "Working...")
 
 def create_img(text, filename):
-    # определяете шрифт
-    font = ImageFont.truetype('Montserrat/Montserrat-Regular.ttf', 52)
+    try:
+        # определяете шрифт
+        font = ImageFont.truetype('Montserrat/Montserrat-Regular.ttf', 52)
 
-    # определяете положение текста на картинке
-    text_position = (15, 380)
+        # определяете положение текста на картинке
+        text_position = (15, 380)
 
-    # цвет текста, RGB
-    text_color = (0, 0, 0)
+        # цвет текста, RGB
+        text_color = (0, 0, 0)
 
-    # загружаете фоновое изображение
-    img = Image.open('blank.jpg')
+        # загружаете фоновое изображение
+        img = Image.open('blank.jpg')
 
-    # определяете объект для рисования
-    draw = ImageDraw.Draw(img)
+        # определяете объект для рисования
+        draw = ImageDraw.Draw(img)
 
-    # добавляем текст
-    draw.text(text_position, text, text_color, font)
+        # добавляем текст
+        draw.text(text_position, text, text_color, font)
 
-    # сохраняем новое изображение
-    img.save(filename)
-    print("success")
+        # сохраняем новое изображение
+        img.save(filename)
+        print(chalk.green("Images saved successfully, sending... \n"))
+    except imgErr:
+        print(red + imgErr)
+        print(chalk.red("Error while sending images!!!, reloading"))
+    
+
+def send_photo(message, paths):
+    for path in paths:
+        print(chalk.cyan("sent " + path))
+        bot.send_photo(message.chat.id, open(path, 'rb'))
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -67,8 +82,8 @@ def get_text(message):
         else:
             pass
 
-    print(output)
-    print(textArr)
+    print(yellow + "Got: " + str(textArr) + "\n")
+    print(green + "Output: " + str(output) + "\n")
     paths = []
     num = 0
     for one in range(len(output)):
@@ -76,10 +91,7 @@ def get_text(message):
         paths.append("img_" + str(num) + ".jpg")
         num += 1
 
-    for path in paths:
-        print("sent " + path)
-        bot.send_photo(message.chat.id, open(path, 'rb'));
-
-
+    send_photo(message, paths)
+    
 
 bot.polling()
